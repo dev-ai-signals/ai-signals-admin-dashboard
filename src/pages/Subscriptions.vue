@@ -11,7 +11,7 @@
           placeholder="Search"
           class="search-input"
         />
-        <button class="create-btn">+ Create New Plan</button>
+        <button class="create-btn" @click="showModal = true">+ Create New Plan</button>
       </div>
     </div>
 
@@ -28,13 +28,18 @@
       <div class="table-row" v-for="user in filteredUsers" :key="user.id">
         <div class="cell plan">{{ user.plan }}</div>
         <div class="cell edit">
-          <img src="@/assets/icons/subscription/edit.svg" alt="Edit" class="icon" />
+          <img
+            src="@/assets/icons/subscription/edit.svg"
+            alt="Edit"
+            class="icon"
+            @click="showEdit = true"
+          />
           <img src="@/assets/icons/subscription/delete.svg" alt="Delete" class="icon" />
         </div>
         <div class="cell user">{{ user.display }}</div>
         <div class="cell reg">{{ user.date }}</div>
         <div class="cell actions">
-          <button class="btn on">EXTEND</button>
+          <button class="btn on" @click="showExtend = true">EXTEND</button>
           <button class="btn off">FORCE EXPIRE</button>
         </div>
         <div
@@ -46,11 +51,22 @@
       </div>
     </div>
   </section>
+
+  <CreatePlan v-if="showModal" @close="showModal = false" />
+  <ExtendSubscription v-if="showExtend" @close="showExtend = false" />
+  <EditPlan v-if="showEdit" @close="showEdit = false" />
+
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import CreatePlan from '@/components/modals/CreatePlan.vue'
+import ExtendSubscription from '@/components/modals/ExtendSubscription.vue'
+import EditPlan from '@/components/modals/EditPlan.vue'
 
+const showEdit = ref(false)
+const showExtend = ref(false)
+const showModal = ref(false)
 const search = ref('')
 
 const users = [
@@ -182,7 +198,7 @@ const filteredUsers = computed(() =>
   }
 
   .btn {
-    padding: 4px 12px;
+    padding: 8px 16px;
     font-size: 13px;
     font-weight: 500;
     border-radius: 4px;

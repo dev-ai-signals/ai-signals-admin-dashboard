@@ -90,15 +90,6 @@ import tier2Icon from '@/assets/icons/dashboard/tier-2.svg'
 import totalSalesIcon from '@/assets/icons/dashboard/total-sales.svg'
 import monthlySalesIcon from '@/assets/icons/dashboard/monthly-sales.svg'
 
-const totalCards = [
-  { icon: paidIcon, value: '323000', label: 'Paid Subscriptions' },
-  { icon: expiredIcon, value: '123000', label: 'Expired Subscriptions' },
-  { icon: tier1Icon, value: '23000', label: 'Tier 1 Affiliates' },
-  { icon: tier2Icon, value: '200000', label: 'Tier 2 Affiliates' },
-  { icon: totalSalesIcon, value: '200000', label: 'Total Sales' },
-  { icon: monthlySalesIcon, value: '5000', label: 'Monthly Sales' },
-]
-
 const plans = [
   { name: 'Standard Plan', users: '30000' },
   { name: 'Plan 2', users: '30000' },
