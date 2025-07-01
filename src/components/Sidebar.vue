@@ -66,7 +66,7 @@
     </nav>
 
     <div class="sidebar__footer">
-      <RouterLink to="/profile" custom v-slot="{ navigate, isActive }">
+      <RouterLink to="/profile" custom>
         <div class="sidebar__profile">
           <div class="img-wrapper">
             <img src="@/assets/icons/profile.svg" alt="Profile" />

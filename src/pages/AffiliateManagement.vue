@@ -7,7 +7,6 @@
       </div>
       <div class="button-group">
         <div class="button-group">
-          <button class="btn global">GLOBAL MODIFICATION</button>
           <button
             class="btn tier"
             :class="{ active: activeTier === 'T1' }"
