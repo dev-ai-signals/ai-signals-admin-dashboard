@@ -8,22 +8,77 @@
         </button>
       </div>
 
-      <form class="modal-body">
-        <label>Plan Name</label>
-        <input type="text" placeholder="Enter plan name" />
+      <form class="modal-body" @submit.prevent="savePlan">
+        <label>Name</label>
+        <input type="text" v-model="name" placeholder="Enter plan name" />
 
-        <label>Cost</label>
-        <input type="text" placeholder="Enter price" />
+        <label>Price</label>
+        <input type="text" v-model="priceUSD" placeholder="Enter price" />
+
+        <label>Free Trial Duration(days)</label>
+        <input type="number" v-model="freeTrialDuration" placeholder="Enter number of days" />
+
+        <label>Crypto Discount (%)</label>
+        <input type="number" v-model="cryptoDiscount" placeholder="Enter discount %" />
+
+        <label>Tier 1 Commission</label>
+        <input type="text" v-model="tier1comission" placeholder="Enter amount" />
+
+        <label>Tier 2 Commission</label>
+        <input type="text" v-model="tier2comission" placeholder="Enter amount" />
+
+        <label>Description</label>
+        <input type="text" v-model="description" placeholder="Enter description" />
 
         <button type="submit" class="save-btn">Save</button>
       </form>
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+import api from '@/shared/api/axios'
 import closeIcon from '@/assets/icons/close.svg'
+
+const emit = defineEmits(['close', 'created'])
+
+const name = ref('')
+const priceUSD = ref('')
+const freeTrialDuration = ref('')
+const tier1comission = ref('')
+const tier2comission = ref('')
+const cryptoDiscount = ref('')
+const description = ref('')
+
+async function savePlan() {
+  try {
+    const payload = {
+      name: name.value,
+      priceUSD: parseFloat(priceUSD.value),
+      durationDays: 30,
+      cryptoDiscount: parseInt(cryptoDiscount.value) || 0,
+      description: description.value
+    }
+
+    await api.post('/admin/plans', payload)
+
+    emit('close')
+    emit('created')
+
+    name.value = ''
+    priceUSD.value = ''
+    cryptoDiscount.value = ''
+    description.value = ''
+  } catch (e) {
+    console.error('Failed to create plan:', e)
+    alert('Failed to create plan')
+  }
+}
+
 </script>
+
 
 <style scoped lang="scss">
 .modal-overlay {
