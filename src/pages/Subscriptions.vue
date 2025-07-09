@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import api from '@/shared/api/axios'
 import CreatePlan from '@/components/modals/CreatePlan.vue'
 import ExtendSubscription from '@/components/modals/ExtendSubscription.vue'
@@ -65,7 +65,6 @@ const showEdit = ref(false)
 const showExtend = ref(false)
 const showModal = ref(false)
 const search = ref('')
-const users = ref<any[]>([])
 const plans = ref<any[]>([])
 const selectedPlan = ref<any>(null)
 
@@ -107,12 +106,6 @@ onMounted(fetchPlans)
     alert('Failed to delete plan.')
   }
 }*/
-
-const filteredUsers = computed(() =>
-  users.value.filter(user =>
-    `${user.id} ${user.email}`.toLowerCase().includes(search.value.toLowerCase())
-  )
-)
 </script>
 
 <style scoped lang="scss">

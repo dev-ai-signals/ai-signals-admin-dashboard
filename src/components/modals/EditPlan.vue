@@ -24,7 +24,10 @@ import api from '@/shared/api/axios'
 import closeIcon from '@/assets/icons/close.svg'
 
 const props = defineProps<{ plan: any }>()
-const emit = defineEmits(['close'])
+const emit = defineEmits<{
+  (e: 'close'): void
+  (e: 'saved', payload: { id: string, priceUSD: number }): void
+}>()
 
 const priceUSD = ref('')
 
