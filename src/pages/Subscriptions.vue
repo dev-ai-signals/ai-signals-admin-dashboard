@@ -30,7 +30,10 @@
         <div class="cell edit">
           <img src="@/assets/icons/subscription/edit.svg" alt="Edit" class="icon"
                @click="selectedPlan = plan; showEdit = true" />
-          <img src="@/assets/icons/subscription/delete.svg" alt="Delete" class="icon" />
+          <img src="@/assets/icons/subscription/delete.svg"
+               alt="Delete"
+               class="icon"
+               @click="deletePlan(plan.id)" />
         </div>
         <div class="cell links">https:aisignals/</div>
         <div class="cell user">{{ plan.users }}</div>
@@ -96,16 +99,16 @@ async function fetchPlans() {
 
 onMounted(fetchPlans)
 
-/*async function deletePlan(planId: string) {
+async function deletePlan(planId: string) {
   if (!confirm('Are you sure you want to delete this plan?')) return
   try {
     await api.delete(`/admin/plans/${planId}`)
-    plans.value = plans.value.filter(plan => plan.id !== planId)
+    await fetchPlans()
   } catch (e) {
     console.error('Failed to delete plan:', e)
     alert('Failed to delete plan.')
   }
-}*/
+}
 </script>
 
 <style scoped lang="scss">
