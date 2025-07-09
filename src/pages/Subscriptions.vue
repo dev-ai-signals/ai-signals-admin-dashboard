@@ -70,7 +70,7 @@ const showModal = ref(false)
 const search = ref('')
 
 const users = [
-  { id: 1, plan: 'Plan 1', display: '1 / @ggwpuser', date: '05/16/2025', status: 'Expired' },
+  { id: 1, plan: 'Plan 1', display: '1 / @ggwpuser', date: '05/17/2025', status: 'Expired' },
   { id: 2, plan: 'Plan 2', display: '1 / @michaelthegreat', date: '05/16/2025', status: 'Active' },
   { id: 3, plan: 'Plan 3', display: '1 / @shaunboss2025', date: '05/16/2025', status: 'Active' },
   { id: 4, plan: 'Plan 4', display: '1 / @alextheback', date: '05/16/2025', status: 'Expired' },
