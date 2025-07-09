@@ -27,60 +27,118 @@
 
     <div class="table">
       <div class="table-header">
-        <div class="cell user">User ID / TG Nickname / Email</div>
+        <div class="cell user">Email</div>
         <div class="cell status">Affiliate Status</div>
         <div class="cell master">Set MASTER Affiliate Users</div>
         <div class="cell commission">Commission%</div>
-        <div class="cell discount">Discount Price</div>
         <div class="cell apply">Apply</div>
         <div class="cell referred">Total Referred</div>
+        <div class="cell referred">Total Sold</div>
       </div>
 
-      <div class="table-row" v-for="user in filteredUsers" :key="user.id">
-        <div class="cell user">{{ user.display }}</div>
+      <div class="table-row" v-for="user in filteredUsers" :key="user.userId">
+        <div class="cell user">{{ user.email }}</div>
         <div class="cell status">
-          <span class="status-inactive">Inactive</span>
+    <span :class="user.active ? 'status-active' : 'status-inactive'">
+      {{ user.active ? 'Active' : 'Inactive' }}
+    </span>
         </div>
         <div class="cell master">
-          <button :class="['btn', user.master ? 'master-on' : 'deactivate']">
-            {{ user.master ? 'MASTER ON' : 'DEACTIVATE' }}
+          <button
+            :class="['btn', user.superAffiliate ? 'deactivate' : 'master-on']"
+            @click="toggleSuperAffiliate(user)"
+          >
+            {{ user.superAffiliate ? 'DEACTIVATE' : 'MASTER ON' }}
           </button>
         </div>
         <div class="cell commission">
-          <input type="text" v-model="user.commission" class="input" />
-        </div>
-        <div class="cell discount">
-          <input type="text" v-model="user.discount" class="input" />
+          <input type="text" v-model="user.commissionPercent" class="input" />
         </div>
         <div class="cell apply">
-          <button class="btn apply-btn">APPLY</button>
+          <button
+            class="btn apply-btn"
+            :disabled="!hasChanges(user)"
+            @click="updateCommissionAndDiscount(user)"
+          >
+            APPLY
+          </button>
         </div>
-        <div class="cell referred">{{ user.referred }}</div>
+        <div class="cell referred">{{ user.totalReferred }}</div>
+        <div class="cell sold">1</div>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import api from '@/shared/api/axios'
 
 const search = ref('')
 const activeTier = ref<'T1' | 'T2'>('T1')
+const users = ref<any[]>([])
 
-const users = ref([
-  { id: 1, display: '1 / @ggwpuser / user@gmail.com', tier: 'T1', master: true, commission: '60%', discount: '480', referred: '10' },
-  { id: 2, display: '1 / @ggwpuser / user@gmail.com', tier: 'T2', master: false, commission: '60%', discount: '480', referred: '01' },
-  { id: 3, display: '1 / @ggwpuser / user@gmail.com', tier: 'T2', master: false, commission: '60%', discount: '480', referred: '05' },
-  { id: 4, display: '1 / @ggwpuser / user@gmail.com', tier: 'T1', master: true, commission: '60%', discount: '480', referred: '10' },
-  { id: 5, display: '1 / @ggwpuser / user@gmail.com', tier: 'T2', master: true, commission: '60%', discount: '480', referred: '00' },
-  { id: 6, display: '1 / @ggwpuser / user@gmail.com', tier: 'T1', master: true, commission: '60%', discount: '480', referred: '01' }
-])
+async function fetchUsers(tier: number) {
+  try {
+    const { data } = await api.get(`/affiliate/admin/all?tier=${tier}`)
+    users.value = data.map((u: any) => ({
+      ...u,
+      initialCommissionPercent: u.commissionPercent,
+      initialDiscount: u.discount
+    }))
+  } catch (e) {
+    console.error('Failed to fetch affiliates:', e)
+  }
+}
+
+function hasChanges(user: any) {
+  return user.commissionPercent !== user.initialCommissionPercent ||
+    user.discount !== user.initialDiscount
+}
+
+onMounted(() => fetchUsers(1))
+
+watch(activeTier, (newTier) => {
+  fetchUsers(newTier === 'T1' ? 1 : 2)
+})
+
+async function toggleSuperAffiliate(user: any) {
+  try {
+    await api.post('/affiliate/admin/update', {
+      userId: user.userId,
+      active: user.active,
+      superAffiliate: !user.superAffiliate,
+      commissionPercent: user.commissionPercent,
+      commissionPercentTier2: user.commissionPercentTier2 ?? 0,
+      discount: user.discount
+    })
+    await fetchUsers(activeTier.value === 'T1' ? 1 : 2)
+  } catch (e) {
+    console.error('Failed to toggle superAffiliate:', e)
+    alert('Failed to update user.')
+  }
+}
+
+async function updateCommissionAndDiscount(user: any) {
+  try {
+    await api.post('/affiliate/admin/update', {
+      userId: user.userId,
+      active: user.active,
+      superAffiliate: user.superAffiliate,
+      commissionPercent: user.commissionPercent,
+      commissionPercentTier2: user.commissionPercentTier2 ?? 0,
+      discount: user.discount
+    })
+    await fetchUsers(activeTier.value === 'T1' ? 1 : 2)
+  } catch (e) {
+    console.error('Failed to update commission/discount:', e)
+    alert('Failed to update commission or discount for this user.')
+  }
+}
 
 const filteredUsers = computed(() =>
-  users.value.filter(
-    user =>
-      user.tier === activeTier.value &&
-      user.display.toLowerCase().includes(search.value.toLowerCase())
+  users.value.filter(user =>
+    `${user.userId} ${user.email}`.toLowerCase().includes(search.value.toLowerCase())
   )
 )
 </script>
@@ -215,6 +273,11 @@ const filteredUsers = computed(() =>
         justify-content: center;
       }
 
+      &.sold {
+        flex: 1;
+        justify-content: center;
+      }
+
       .input {
         width: 80px;
         padding: 4px 6px;
@@ -250,6 +313,12 @@ const filteredUsers = computed(() =>
 
         &.apply-btn {
           background-color: #22c55e;
+        }
+
+        &.apply-btn:disabled {
+          background-color: #d1d5db; // gray
+          cursor: not-allowed;
+          color: #9ca3af; // lighter text
         }
       }
     }

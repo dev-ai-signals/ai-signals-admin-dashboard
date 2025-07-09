@@ -2,15 +2,15 @@
   <div class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Membership Modify</h3>
+        <h3>Edit Subscription Price</h3>
         <button class="close-btn" @click="$emit('close')">
           <img :src="closeIcon" alt="Close" />
         </button>
       </div>
 
-      <form class="modal-body">
-        <label>Change</label>
-        <input type="text" placeholder="Plan 1" />
+      <form class="modal-body" @submit.prevent="savePrice">
+        <label>New Price</label>
+        <input type="text" v-model="priceUSD" placeholder="$" />
 
         <button type="submit" class="save-btn">Save</button>
       </form>
@@ -19,7 +19,36 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+import api from '@/shared/api/axios'
 import closeIcon from '@/assets/icons/close.svg'
+
+const props = defineProps<{ plan: any }>()
+const emit = defineEmits(['close'])
+
+const priceUSD = ref('')
+
+watch(() => props.plan, (newPlan) => {
+  priceUSD.value = newPlan?.priceUSD?.toString() || ''
+})
+
+async function savePrice() {
+  try {
+    if (!props.plan) return
+    await api.put(`/admin/plans/${props.plan.id}`, {
+      name: props.plan.name,
+      priceUSD: parseFloat(priceUSD.value),
+      durationDays: props.plan.durationDays,
+      cryptoDiscount: props.plan.cryptoDiscount,
+      description: props.plan.description
+    })
+    emit('saved', { id: props.plan.id, priceUSD: parseFloat(priceUSD.value) })
+    emit('close')
+  } catch (e) {
+    console.error('Failed to update plan price:', e)
+    alert('Failed to update plan price.')
+  }
+}
 </script>
 
 <style scoped lang="scss">

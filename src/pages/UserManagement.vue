@@ -18,43 +18,85 @@
 
     <div class="table">
       <div class="table-header">
-        <div class="cell id">User ID / TG Nickname / Email</div>
+        <div class="cell id">Email</div>
         <div class="cell date">Registration Date</div>
+        <div class="cell free-trial">Free Trial</div>
         <div class="cell access">Grant Access / Revoke Access</div>
         <div class="cell status">Payout Status</div>
       </div>
 
-      <div class="table-row"  v-for="user in filteredUsers" :key="user.id">
-        <div class="cell id">{{ user.display }}</div>
-        <div class="cell date">{{ user.date }}</div>
-        <div class="cell access">
-          <button class="btn on">ON</button>
-          <button class="btn off">OFF</button>
+      <div class="table-row" v-for="user in filteredUsers" :key="user.id">
+        <div class="cell id">
+          {{ user.email }}
         </div>
-        <div class="cell status subscribed">Subscribed</div>
+        <div class="cell date">
+          {{ new Date(user.createdAt).toLocaleDateString() }}
+        </div>
+        <div class="cell free-trial">
+          7 days
+        </div>
+        <div class="cell access">
+          <button
+            v-if="!user.accessGranted"
+            class="btn on"
+            @click="updateAccess(user.id, true)"
+          >
+            Grant Access
+          </button>
+          <button
+            v-else
+            class="btn off"
+            @click="updateAccess(user.id, false)"
+          >
+            Revoke Access
+          </button>
+        </div>
+        <div class="cell status" :class="{ subscribed: user.subscriptionStatus === 'ACTIVE' }">
+          {{ user.subscriptionStatus === 'ACTIVE' ? 'Subscribed' : 'Expired' }}
+        </div>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-const search = ref('')
-const users = [
-  { id: 1, display: '1 / @ggwpuser / user@gmail.com', date: '05/16/2025' },
-  { id: 2, display: '2 / @michaelthegreat / user@gmail.com', date: '05/16/2025' },
-  { id: 3, display: '3 / @shaunboss2025 / user@gmail.com', date: '05/16/2025' },
-  { id: 4, display: '4 / @alextheback / user@gmail.com', date: '05/16/2025' },
-  { id: 5, display: '5 / @romangol / user@gmail.com', date: '05/16/2025' },
-  { id: 6, display: '6 / @blueblackred / user@gmail.com', date: '05/16/2025' },
-  { id: 7, display: '7 / @gameofthrones / user@gmail.com', date: '05/16/2025' },
-]
+import { ref, computed, onMounted } from 'vue'
+import api from '@/shared/api/axios'
 
+const search = ref('')
+const users = ref<any[]>([]
+)
 const filteredUsers = computed(() =>
-  users.filter((user) =>
-    user.display.toLowerCase().includes(search.value.toLowerCase())
+  users.value.filter(user =>
+    `${user.id} ${user.email}`.toLowerCase().includes(search.value.toLowerCase())
   )
 )
+
+onMounted(async () => {
+  await loadUsers()
+})
+
+async function loadUsers() {
+  try {
+    const { data } = await api.get('/user/admin/all')
+    users.value = data
+  } catch (e) {
+    console.error('Failed to fetch users:', e)
+  }
+}
+
+async function updateAccess(userId: string, grant: boolean) {
+  try {
+    await api.post('/user/admin/update', {
+      userId,
+      accessGranted: grant
+    })
+    await loadUsers()
+  } catch (e) {
+    console.error('Failed to update user access:', e)
+    alert('Failed to update access.')
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -175,6 +217,10 @@ const filteredUsers = computed(() =>
       flex: 1.5;
       display: flex;
       gap: 8px;
+    }
+
+    &.free-trial {
+      flex: 1;
     }
 
     &.status {

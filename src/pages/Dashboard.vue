@@ -11,7 +11,7 @@
               <img :src="paidIcon" alt="Paid Subscriptions" class="dashboard__icon" />
             </div>
             <div class="values-container">
-              <div class="dashboard__value">323000</div>
+              <div class="dashboard__value">{{ paidSubscriptions }}</div>
               <div class="dashboard__label">Paid Subscriptions</div>
             </div>
           </div>
@@ -20,7 +20,7 @@
               <img :src="expiredIcon" alt="Expired Subscriptions" class="dashboard__icon" />
             </div>
             <div class="values-container">
-              <div class="dashboard__value">123000</div>
+              <div class="dashboard__value">{{ expiredSubscriptions }}</div>
               <div class="dashboard__label">Expired Subscriptions</div>
             </div>
           </div>
@@ -29,7 +29,7 @@
               <img :src="tier1Icon" alt="Tier 1 Affiliates" class="dashboard__icon" />
             </div>
             <div class="values-container">
-              <div class="dashboard__value">23000</div>
+              <div class="dashboard__value">{{ tier1Affiliates }}</div>
               <div class="dashboard__label">Tier 1 Affiliates</div>
             </div>
           </div>
@@ -38,7 +38,7 @@
               <img :src="tier2Icon" alt="Tier 2 Affiliates" class="dashboard__icon" />
             </div>
             <div class="values-container">
-              <div class="dashboard__value">200000</div>
+              <div class="dashboard__value">{{ tier2Affiliates }}</div>
               <div class="dashboard__label">Tier 2 Affiliates</div>
             </div>
           </div>
@@ -47,7 +47,7 @@
               <img :src="totalSalesIcon" alt="Total Sales" class="dashboard__icon" />
             </div>
             <div class="values-container">
-              <div class="dashboard__value">200000</div>
+              <div class="dashboard__value">{{ totalSales }}</div>
               <div class="dashboard__label">Total Sales</div>
             </div>
           </div>
@@ -56,7 +56,7 @@
               <img :src="monthlySalesIcon" alt="Monthly Sales" class="dashboard__icon" />
             </div>
             <div class="values-container">
-              <div class="dashboard__value">5000</div>
+              <div class="dashboard__value">{{ monthlySales }}</div>
               <div class="dashboard__label">Monthly Sales</div>
             </div>
           </div>
@@ -83,6 +83,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import api from '@/shared/api/axios'
+
 import paidIcon from '@/assets/icons/dashboard/paid-subscriptions.svg'
 import expiredIcon from '@/assets/icons/dashboard/expired-subscriptions.svg'
 import tier1Icon from '@/assets/icons/dashboard/tier-1.svg'
@@ -90,14 +93,44 @@ import tier2Icon from '@/assets/icons/dashboard/tier-2.svg'
 import totalSalesIcon from '@/assets/icons/dashboard/total-sales.svg'
 import monthlySalesIcon from '@/assets/icons/dashboard/monthly-sales.svg'
 
-const plans = [
-  { name: 'Standard Plan', users: '30000' },
-  { name: 'Plan 2', users: '30000' },
-  { name: 'Plan 3', users: '30000' },
-  { name: 'Plan 4', users: '30000' },
-  { name: 'Plan 5', users: '30000' },
-  { name: 'Plan 6', users: '30000' },
-]
+const paidSubscriptions = ref(0)
+const expiredSubscriptions = ref(0)
+const tier1Affiliates = ref(0)
+const tier2Affiliates = ref(0)
+const totalSales = ref(0)
+const monthlySales = ref(0)
+
+const plans = ref<any[]>([])
+
+onMounted(async () => {
+  try {
+    const [summaryRes, plansSubsRes, plansRes] = await Promise.all([
+      api.get('/admin/statistics/dashboard/summary'),
+      api.get('/admin/statistics/dashboard/subscription-statistics'),
+      api.get('/admin/plans')
+    ])
+
+    const data = summaryRes.data
+    paidSubscriptions.value = data.paidSubscriptions
+    expiredSubscriptions.value = data.expiredSubscriptions
+    tier1Affiliates.value = data.tier1Affiliates
+    tier2Affiliates.value = data.tier2Affiliates
+    totalSales.value = data.totalSales
+    monthlySales.value = data.monthlySales
+
+    const statsMap = new Map<string, number>()
+    plansSubsRes.data.forEach((planStat: any) => {
+      statsMap.set(planStat.planName, planStat.usersSubscribed)
+    })
+
+    plans.value = plansRes.data.map((plan: any) => ({
+      name: plan.name,
+      users: statsMap.get(plan.name) || 0
+    }))
+  } catch (e) {
+    console.error('Failed to load dashboard summary or plans:', e)
+  }
+})
 </script>
 
 <style scoped lang="scss">
