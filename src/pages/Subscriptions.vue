@@ -19,8 +19,8 @@
       <div class="table-header">
         <div class="cell plan">Plan</div>
         <div class="cell price">Current Price</div>
-        <div class="cell edit">Edit / Delete Plan</div>
-        <div class="cell links">Affiliate Link</div>
+        <div class="cell edit">Edit / Delete Plan's Price</div>
+        <div class="cell links">Master Affiliate Link</div>
         <div class="cell user">Total Subscribed</div>
       </div>
 
@@ -30,13 +30,25 @@
         <div class="cell edit">
           <img src="@/assets/icons/subscription/edit.svg" alt="Edit" class="icon"
                @click="selectedPlan = plan; showEdit = true" />
-          <img src="@/assets/icons/subscription/delete.svg"
-               alt="Delete"
-               class="icon"
-               @click="deletePlan(plan.id)" />
+          <img
+            src="@/assets/icons/subscription/delete.svg"
+            alt="Delete"
+            class="icon"
+            @click="deletePlan(plan.id)"
+          />
         </div>
-        <div class="cell links">https:aisignals/</div>
-        <div class="cell user">{{ plan.users }}</div>
+        <div class="cell links">
+          <div class="copy-wrapper">
+            <span class="link-text">{{ plan.masterAffiliateLink }}</span>
+            <img
+              src="@/assets/icons/copy.svg"
+              alt="Copy"
+              class="copy-icon"
+              @click="copyToClipboard(plan.masterAffiliateLink)"
+            />
+          </div>
+        </div>
+        <div class="cell user">{{ plan.subscribedCount }}</div>
       </div>
     </div>
   </section>
@@ -78,43 +90,70 @@ function updatePlanPrice({ id, priceUSD }: { id: string, priceUSD: number }) {
 
 async function fetchPlans() {
   try {
-    const [plansRes, statsRes] = await Promise.all([
-      api.get('/admin/plans'),
-      api.get('/admin/statistics/dashboard/subscription-statistics')
-    ])
-
-    const statsMap = new Map<string, number>()
-    statsRes.data.forEach((planStat: any) => {
-      statsMap.set(planStat.planName.toLowerCase(), planStat.usersSubscribed)
-    })
-
-    plans.value = plansRes.data.map((plan: any) => ({
+    const res = await api.get('/admin/plans')
+    plans.value = res.data.map((plan: any) => ({
       ...plan,
-      users: statsMap.get(plan.name.toLowerCase()) || 0
+      users: plan.subscribedCount || 0
     }))
   } catch (e) {
-    console.error('Failed to load plans or statistics:', e)
+    console.error('Failed to load plans:', e)
   }
+}
+
+function copyToClipboard(text: string) {
+  navigator.clipboard.writeText(text).then(() => {
+    // Optional: show a toast or temporary visual feedback
+    console.log('Link copied:', text)
+  })
 }
 
 onMounted(fetchPlans)
 
 async function deletePlan(planId: string) {
-  if (!confirm('Are you sure you want to delete this plan?')) return
+  const confirmed = confirm('Are you sure you want to delete this plan?')
+  if (!confirmed) return
+
   try {
     await api.delete(`/admin/plans/${planId}`)
-    await fetchPlans()
+    plans.value = plans.value.filter(plan => plan.id !== planId)
   } catch (e) {
     console.error('Failed to delete plan:', e)
     alert('Failed to delete plan.')
   }
-}
+}*/
 </script>
 
 <style scoped lang="scss">
 .subscription-management {
   background-color: transparent;
   border-radius: 8px;
+
+  .copy-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .link-text {
+      font-size: 13px;
+      color: #1f2937;
+      word-break: break-word;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-icon {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      opacity: 0.7;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
 
   .heading-container {
     display: flex;
@@ -214,6 +253,7 @@ async function deletePlan(planId: string) {
 
     &.user {
       flex: 1;
+      justify-content: flex-end;
     }
   }
 

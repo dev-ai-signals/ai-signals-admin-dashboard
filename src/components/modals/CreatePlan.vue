@@ -18,17 +18,18 @@
         <label>Free Trial Duration(days)</label>
         <input type="number" v-model="freeTrialDuration" placeholder="Enter number of days" />
 
-        <label>Crypto Discount (%)</label>
-        <input type="number" v-model="cryptoDiscount" placeholder="Enter discount %" />
+        <label>Duration (days)</label>
+        <input
+          type="number"
+          v-model="durationDays"
+          placeholder="Enter subscription duration"
+        />
 
         <label>Tier 1 Commission</label>
         <input type="text" v-model="tier1comission" placeholder="Enter amount" />
 
         <label>Tier 2 Commission</label>
         <input type="text" v-model="tier2comission" placeholder="Enter amount" />
-
-        <label>Description</label>
-        <input type="text" v-model="description" placeholder="Enter description" />
 
         <button type="submit" class="save-btn">Save</button>
       </form>
@@ -49,17 +50,17 @@ const priceUSD = ref('')
 const freeTrialDuration = ref('')
 const tier1comission = ref('')
 const tier2comission = ref('')
-const cryptoDiscount = ref('')
-const description = ref('')
+const durationDays = ref('')
 
 async function savePlan() {
   try {
     const payload = {
       name: name.value,
       priceUSD: parseFloat(priceUSD.value),
-      durationDays: 30,
-      cryptoDiscount: parseInt(cryptoDiscount.value) || 0,
-      description: description.value
+      trialDays: parseInt(freeTrialDuration.value) || 0,
+      durationDays: parseInt(durationDays.value) || 0,
+      tier1CommissionPercent: parseInt(tier1comission.value) || 0,
+      tier2CommissionPercent: parseInt(tier2comission.value) || 0
     }
 
     await api.post('/admin/plans', payload)
@@ -67,10 +68,12 @@ async function savePlan() {
     emit('close')
     emit('created')
 
+    durationDays.value = ''
     name.value = ''
     priceUSD.value = ''
-    cryptoDiscount.value = ''
-    description.value = ''
+    freeTrialDuration.value = ''
+    tier1comission.value = ''
+    tier2comission.value = ''
   } catch (e) {
     console.error('Failed to create plan:', e)
     alert('Failed to create plan')

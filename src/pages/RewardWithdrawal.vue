@@ -1,43 +1,35 @@
 <template>
   <section class="withdrawal-request">
     <div class="header-actions">
-      <h2 class="title">Reward Withdrawal Request</h2>
+      <h2 class="title">Sweeping History</h2>
+      <div class="tabs">
+        <button
+          :class="['tab-btn', activeTab === 'daily' && 'active']"
+          @click="activeTab = 'daily'"
+        >Daily</button>
+        <button
+          :class="['tab-btn', activeTab === 'weekly' && 'active']"
+          @click="activeTab = 'weekly'"
+        >Weekly</button>
+        <button
+          :class="['tab-btn', activeTab === 'monthly' && 'active']"
+          @click="activeTab = 'monthly'"
+        >Monthly</button>
+      </div>
       <input v-model="search" type="text" placeholder="Search" class="search-input" />
     </div>
 
     <div class="table">
       <div class="table-header">
-        <div class="cell user">User ID / TG Nickname / Email</div>
-        <div class="cell block">Block</div>
-        <div class="cell amount">Amount</div>
-        <div class="cell date">Transaction Date</div>
-        <div class="cell network">Network</div>
-        <div class="cell address">Wallet Address</div>
-        <div class="cell status">Status</div>
-        <div class="cell txid">TXID</div>
+        <div class="cell email">Affiliates: emails</div>
+        <div class="cell date">Date</div>
+        <div class="cell amount">Paid Amount</div>
       </div>
 
-      <div class="table-row" v-for="item in filteredData" :key="item.id">
-        <div class="cell user">{{ item.user }}</div>
-        <div class="cell block">
-          <button class="btn block-btn">BLOCK</button>
-        </div>
-        <div class="cell amount">{{ item.amount }}</div>
-        <div class="cell date">{{ item.date }}</div>
-        <div class="cell network">{{ item.network }}</div>
-        <div class="cell address">
-          <span>{{ item.address }}</span>
-          <img
-            src="@/assets/icons/copy.svg"
-            alt="Copy"
-            class="copy-icon"
-            @click="copyToClipboard(item.address)"
-          />
-        </div>
-        <div class="cell status">
-          <span :class="['badge', item.status.toLowerCase()]">{{ item.status }}</span>
-        </div>
-        <div class="cell txid">{{ item.txid }}</div>
+      <div class="table-row" v-for="entry in filteredData" :key="entry.id">
+        <div class="cell email">{{ entry.email }}</div>
+        <div class="cell date">{{ entry.date }}</div>
+        <div class="cell amount">{{ entry.amount }}</div>
       </div>
     </div>
   </section>
@@ -47,53 +39,24 @@
 import { ref, computed } from 'vue'
 
 const search = ref('')
+const activeTab = ref<'daily' | 'weekly' | 'monthly'>('daily')
 
 const data = ref([
-  {
-    id: 1,
-    user: '1 / @ggwpuser / user@gmail.com',
-    amount: '400USDC',
-    date: '17/05/2025',
-    network: 'OPTIMISM',
-    address: 'ASDHV2301271286',
-    status: 'PAID',
-    txid: '17/05/2025'
-  },
-  {
-    id: 2,
-    user: '1 / @ggwpuser / user@gmail.com',
-    amount: '400USDC',
-    date: '17/05/2025',
-    network: 'OPTIMISM',
-    address: 'ASDHV2301271286',
-    status: 'PENDING',
-    txid: '17/05/2025'
-  },
-  {
-    id: 3,
-    user: '1 / @ggwpuser / user@gmail.com',
-    amount: '400USDC',
-    date: '17/05/2025',
-    network: 'OPTIMISM',
-    address: 'ASDHV2301271286',
-    status: 'PAID',
-    txid: '17/05/2025'
-  }
+  { id: 1, email: 'customer1@aisignals.com', date: '7/3/2025', amount: '1000$' },
+  { id: 2, email: 'customer2@aisignals.com', date: '7/4/2025', amount: '1000$' },
+  { id: 3, email: 'vg@mail.com', date: '7/5/2025', amount: '1000$' },
+  { id: 4, email: 'aisignals.aws@gmail.com', date: '7/1/2025', amount: '1000$' }
 ])
 
 const filteredData = computed(() =>
-  data.value.filter(item =>
-    item.user.toLowerCase().includes(search.value.toLowerCase())
-  )
+  data.value
+    .filter(entry => entry.email.toLowerCase().includes(search.value.toLowerCase()))
+    .filter(entry => {
+      if (activeTab.value === 'daily') return true
+      if (activeTab.value === 'weekly') return entry.id !== 1
+      if (activeTab.value === 'monthly') return entry.id === 4
+    })
 )
-
-function copyToClipboard(text: string) {
-  navigator.clipboard.writeText(text).then(() => {
-    console.log(`Copied: ${text}`)
-  }).catch((err) => {
-    console.error('Failed to copy:', err)
-  })
-}
 </script>
 
 <style scoped lang="scss">
@@ -124,6 +87,27 @@ function copyToClipboard(text: string) {
         border-color: #22c55e;
       }
     }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+
+      .tab-btn {
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        border: none;
+        border-radius: 4px;
+        background-color: #e5e7eb;
+        color: #1f2937;
+        cursor: pointer;
+
+        &.active {
+          background-color: #22c55e;
+          color: #fff;
+        }
+      }
+    }
   }
 
   .table {
@@ -150,7 +134,6 @@ function copyToClipboard(text: string) {
     .table-row {
       background-color: #fff;
       color: #374151;
-      padding: 26px 16px 26px 16px;
     }
 
     .cell {
@@ -158,72 +141,17 @@ function copyToClipboard(text: string) {
       display: flex;
       align-items: center;
 
-      &.user {
+      &.email {
         flex: 2;
       }
 
-      &.block,
-      &.amount,
       &.date,
-      &.network,
-      &.address,
-      &.status,
-      &.txid {
+      &.amount {
         flex: 1.2;
         justify-content: center;
-      }
-
-      &.address {
-        gap: 8px;
-
-        .copy-icon {
-          width: 16px;
-          height: 16px;
-          cursor: pointer;
-          opacity: 0.6;
-          transition: opacity 0.2s ease;
-
-          &:hover {
-            opacity: 1;
-          }
-        }
-      }
-
-
-      .btn.block-btn {
-        padding: 4px 10px;
-        font-size: 13px;
-        font-weight: 500;
-        border-radius: 4px;
-        border: 1px solid #9ca3af;
-        background-color: #f3f4f6;
-        color: #1f2937;
-        cursor: pointer;
-      }
-
-      .badge {
-        padding: 4px 12px;
-        font-size: 13px;
-        width: 88px;
-        height: 30px;
-        font-weight: 500;
-        border-radius: 4px;
-        text-transform: uppercase;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &.paid {
-          background-color: #22c55e;
-          color: #fff;
-        }
-
-        &.pending {
-          background-color: #f97316;
-          color: #fff;
-        }
       }
     }
   }
 }
+
 </style>
