@@ -31,9 +31,9 @@
         <div class="cell status">Affiliate Status</div>
         <div class="cell master">Set MASTER Affiliate Users</div>
         <div class="cell commission">Commission%</div>
+        <div class="cell commission-tier2">Tier 2 Commission%</div>
         <div class="cell apply">Apply</div>
         <div class="cell referred">Total Referred</div>
-        <div class="cell referred">Total Sold</div>
       </div>
 
       <div class="table-row" v-for="user in filteredUsers" :key="user.userId">
@@ -54,17 +54,19 @@
         <div class="cell commission">
           <input type="text" v-model="user.commissionPercent" class="input" />
         </div>
+        <div class="cell commission-tier2">
+          <input type="text" v-model="user.commissionPercentTier2" class="input" />
+        </div>
         <div class="cell apply">
           <button
             class="btn apply-btn"
             :disabled="!hasChanges(user)"
-            @click="updateCommissionAndDiscount(user)"
+            @click="updateCommission(user)"
           >
             APPLY
           </button>
         </div>
         <div class="cell referred">{{ user.totalReferred }}</div>
-        <div class="cell sold">1</div>
       </div>
     </div>
   </section>
@@ -83,8 +85,10 @@ async function fetchUsers(tier: number) {
     const { data } = await api.get(`/affiliate/admin/all?tier=${tier}`)
     users.value = data.map((u: any) => ({
       ...u,
-      initialCommissionPercent: u.commissionPercent,
-      initialDiscount: u.discount
+      commissionPercent: u.commissionPercent ?? 0,
+      commissionPercentTier2: u.commissionPercentTier2 ?? 0,
+      initialCommissionPercent: u.commissionPercent ?? 0,
+      initialCommissionPercentTier2: u.commissionPercentTier2 ?? 0,
     }))
   } catch (e) {
     console.error('Failed to fetch affiliates:', e)
@@ -92,8 +96,10 @@ async function fetchUsers(tier: number) {
 }
 
 function hasChanges(user: any) {
-  return user.commissionPercent !== user.initialCommissionPercent ||
-    user.discount !== user.initialDiscount
+  return (
+    user.commissionPercent !== user.initialCommissionPercent ||
+    user.commissionPercentTier2 !== user.initialCommissionPercentTier2
+  )
 }
 
 onMounted(() => fetchUsers(1))
@@ -109,8 +115,6 @@ async function toggleSuperAffiliate(user: any) {
       active: user.active,
       superAffiliate: !user.superAffiliate,
       commissionPercent: user.commissionPercent,
-      commissionPercentTier2: user.commissionPercentTier2 ?? 0,
-      discount: user.discount
     })
     await fetchUsers(activeTier.value === 'T1' ? 1 : 2)
   } catch (e) {
@@ -119,20 +123,19 @@ async function toggleSuperAffiliate(user: any) {
   }
 }
 
-async function updateCommissionAndDiscount(user: any) {
+async function updateCommission(user: any) {
   try {
     await api.post('/affiliate/admin/update', {
       userId: user.userId,
       active: user.active,
       superAffiliate: user.superAffiliate,
       commissionPercent: user.commissionPercent,
-      commissionPercentTier2: user.commissionPercentTier2 ?? 0,
-      discount: user.discount
+      commissionPercentTier2: user.commissionPercentTier2 ?? 0
     })
     await fetchUsers(activeTier.value === 'T1' ? 1 : 2)
   } catch (e) {
-    console.error('Failed to update commission/discount:', e)
-    alert('Failed to update commission or discount for this user.')
+    console.error('Failed to update commission:', e)
+    alert('Failed to update commission for this user.')
   }
 }
 
@@ -257,10 +260,6 @@ const filteredUsers = computed(() =>
       }
 
       &.commission {
-        flex: 1;
-      }
-
-      &.discount {
         flex: 1;
       }
 

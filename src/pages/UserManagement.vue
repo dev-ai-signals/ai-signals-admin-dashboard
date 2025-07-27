@@ -20,7 +20,6 @@
       <div class="table-header">
         <div class="cell id">Email</div>
         <div class="cell date">Registration Date</div>
-        <div class="cell free-trial">Free Trial</div>
         <div class="cell access">Grant Access / Revoke Access</div>
         <div class="cell status">Payout Status</div>
       </div>
@@ -31,9 +30,6 @@
         </div>
         <div class="cell date">
           {{ new Date(user.createdAt).toLocaleDateString() }}
-        </div>
-        <div class="cell free-trial">
-          7 days
         </div>
         <div class="cell access">
           <button
@@ -206,7 +202,7 @@ async function updateAccess(userId: string, grant: boolean) {
     flex: 1;
 
     &.id {
-      flex: 2;
+      flex: 1;
     }
 
     &.date {

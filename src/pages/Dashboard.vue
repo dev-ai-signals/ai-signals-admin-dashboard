@@ -104,11 +104,8 @@ const plans = ref<any[]>([])
 
 onMounted(async () => {
   try {
-    const [summaryRes, plansSubsRes, plansRes] = await Promise.all([
-      api.get('/admin/statistics/dashboard/summary'),
-      api.get('/admin/statistics/dashboard/subscription-statistics'),
-      api.get('/admin/plans')
-    ])
+    const summaryRes = await api.get('/admin/statistics/dashboard/summary')
+    const plansRes = await api.get('/admin/plans')
 
     const data = summaryRes.data
     paidSubscriptions.value = data.paidSubscriptions
@@ -118,14 +115,9 @@ onMounted(async () => {
     totalSales.value = data.totalSales
     monthlySales.value = data.monthlySales
 
-    const statsMap = new Map<string, number>()
-    plansSubsRes.data.forEach((planStat: any) => {
-      statsMap.set(planStat.planName, planStat.usersSubscribed)
-    })
-
     plans.value = plansRes.data.map((plan: any) => ({
       name: plan.name,
-      users: statsMap.get(plan.name) || 0
+      users: plan.subscribedCount || 0
     }))
   } catch (e) {
     console.error('Failed to load dashboard summary or plans:', e)

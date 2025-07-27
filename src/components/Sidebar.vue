@@ -42,7 +42,7 @@
           <div class="img-wrapper">
             <img :src="withdrawalRequestIcon" alt="Withdrawal Request" class="sidebar__icon" />
           </div>
-          <span>Reward Withdrawal Request</span>
+          <span>Sweeping History</span>
         </div>
       </RouterLink>
 
