@@ -102,7 +102,6 @@ async function fetchPlans() {
 
 function copyToClipboard(text: string) {
   navigator.clipboard.writeText(text).then(() => {
-    // Optional: show a toast or temporary visual feedback
     console.log('Link copied:', text)
   })
 }
@@ -120,7 +119,7 @@ async function deletePlan(planId: string) {
     console.error('Failed to delete plan:', e)
     alert('Failed to delete plan.')
   }
-}*/
+}
 </script>
 
 <style scoped lang="scss">
