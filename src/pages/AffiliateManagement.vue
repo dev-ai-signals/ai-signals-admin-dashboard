@@ -33,15 +33,16 @@
         <div class="cell commission">Commission%</div>
         <div class="cell commission-tier2">Tier 2 Commission%</div>
         <div class="cell apply">Apply</div>
-        <div class="cell referred">Total Referred</div>
+        <div v-if="activeTier === 'T2'" class="cell referred">Total Referred</div>
+        <div class="cell sold">Total Sold</div>
       </div>
 
       <div class="table-row" v-for="user in filteredUsers" :key="user.userId">
         <div class="cell user">{{ user.email }}</div>
         <div class="cell status">
-    <span :class="user.active ? 'status-active' : 'status-inactive'">
-      {{ user.active ? 'Active' : 'Inactive' }}
-    </span>
+          <span :class="user.active ? 'status-active' : 'status-inactive'">
+            {{ user.active ? 'Active' : 'Inactive' }}
+          </span>
         </div>
         <div class="cell master">
           <button
@@ -52,10 +53,10 @@
           </button>
         </div>
         <div class="cell commission">
-          <input type="text" v-model="user.commissionPercent" class="input" />
+          <input type="number" v-model.number="user.commissionPercent" class="input" />
         </div>
         <div class="cell commission-tier2">
-          <input type="text" v-model="user.commissionPercentTier2" class="input" />
+          <input type="number" v-model.number="user.commissionPercentTier2" class="input" />
         </div>
         <div class="cell apply">
           <button
@@ -66,7 +67,8 @@
             APPLY
           </button>
         </div>
-        <div class="cell referred">{{ user.totalReferred }}</div>
+        <div v-if="activeTier === 'T2'" class="cell referred">{{ user.totalReferred }}</div>
+        <div class="cell sold">{{ user.totalSold?.toFixed?.(2) ?? '0.00' }}</div>
       </div>
     </div>
   </section>
@@ -112,9 +114,7 @@ async function toggleSuperAffiliate(user: any) {
   try {
     await api.post('/affiliate/admin/update', {
       userId: user.userId,
-      active: user.active,
-      superAffiliate: !user.superAffiliate,
-      commissionPercent: user.commissionPercent,
+      superAffiliate: !user.superAffiliate
     })
     await fetchUsers(activeTier.value === 'T1' ? 1 : 2)
   } catch (e) {
@@ -127,10 +127,8 @@ async function updateCommission(user: any) {
   try {
     await api.post('/affiliate/admin/update', {
       userId: user.userId,
-      active: user.active,
-      superAffiliate: user.superAffiliate,
       commissionPercent: user.commissionPercent,
-      commissionPercentTier2: user.commissionPercentTier2 ?? 0
+      overrideCommissionPercent: user.commissionPercentTier2
     })
     await fetchUsers(activeTier.value === 'T1' ? 1 : 2)
   } catch (e) {

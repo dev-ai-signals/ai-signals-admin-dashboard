@@ -31,6 +31,9 @@
         <label>Tier 2 Commission</label>
         <input type="text" v-model="tier2comission" placeholder="Enter amount" />
 
+        <label>Master Commission</label>
+        <input type="text" v-model="masterCommission" placeholder="Enter amount" />
+
         <button type="submit" class="save-btn">Save</button>
       </form>
 
@@ -51,6 +54,7 @@ const freeTrialDuration = ref('')
 const tier1comission = ref('')
 const tier2comission = ref('')
 const durationDays = ref('')
+const masterCommission = ref('')
 
 async function savePlan() {
   try {
@@ -60,7 +64,8 @@ async function savePlan() {
       trialDays: parseInt(freeTrialDuration.value) || 0,
       durationDays: parseInt(durationDays.value) || 0,
       tier1CommissionPercent: parseInt(tier1comission.value) || 0,
-      tier2CommissionPercent: parseInt(tier2comission.value) || 0
+      tier2CommissionPercent: parseInt(tier2comission.value) || 0,
+      masterCommissionPercent: parseInt(masterCommission.value) || 0
     }
 
     await api.post('/admin/plans', payload)
@@ -74,6 +79,7 @@ async function savePlan() {
     freeTrialDuration.value = ''
     tier1comission.value = ''
     tier2comission.value = ''
+    masterCommission.value = ''
   } catch (e) {
     console.error('Failed to create plan:', e)
     alert('Failed to create plan')
