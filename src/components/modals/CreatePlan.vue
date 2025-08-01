@@ -68,7 +68,7 @@ async function savePlan() {
       masterCommissionPercent: parseInt(masterCommission.value) || 0
     }
 
-    await api.post('/admin/plans', payload)
+    await api.post('/plans', payload)
 
     emit('close')
     emit('created')

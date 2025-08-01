@@ -105,7 +105,7 @@ const plans = ref<any[]>([])
 onMounted(async () => {
   try {
     const summaryRes = await api.get('/admin/statistics/dashboard/summary')
-    const plansRes = await api.get('/admin/plans')
+    const plansRes = await api.get('/plans')
 
     const data = summaryRes.data
     paidSubscriptions.value = data.paidSubscriptions

@@ -38,7 +38,7 @@ watch(() => props.plan, (newPlan) => {
 async function savePrice() {
   try {
     if (!props.plan) return
-    await api.put(`/admin/plans/${props.plan.id}`, {
+    await api.put(`/plans/${props.plan.id}`, {
       name: props.plan.name,
       priceUSD: parseFloat(priceUSD.value),
       durationDays: props.plan.durationDays,

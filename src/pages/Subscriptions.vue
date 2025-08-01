@@ -90,7 +90,7 @@ function updatePlanPrice({ id, priceUSD }: { id: string, priceUSD: number }) {
 
 async function fetchPlans() {
   try {
-    const res = await api.get('/admin/plans')
+    const res = await api.get('/plans')
     plans.value = res.data.map((plan: any) => ({
       ...plan,
       users: plan.subscribedCount || 0
@@ -113,7 +113,7 @@ async function deletePlan(planId: string) {
   if (!confirmed) return
 
   try {
-    await api.delete(`/admin/plans/${planId}`)
+    await api.delete(`/plans/${planId}`)
     plans.value = plans.value.filter(plan => plan.id !== planId)
   } catch (e) {
     console.error('Failed to delete plan:', e)
