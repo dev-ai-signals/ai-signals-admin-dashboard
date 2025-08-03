@@ -52,6 +52,12 @@
         </div>
       </div>
     </div>
+
+    <div class="pagination">
+      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 0">Prev</button>
+      <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+      <button @click="goToPage(currentPage + 1)" :disabled="currentPage + 1 >= totalPages">Next</button>
+    </div>
   </section>
 </template>
 
@@ -59,25 +65,37 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '@/shared/api/axios'
 
+const users = ref<any[]>([])
 const search = ref('')
-const users = ref<any[]>([]
-)
+const currentPage = ref(0)
+const pageSize = ref(10)
+const totalPages = ref(0)
+
 const filteredUsers = computed(() =>
   users.value.filter(user =>
-    `${user.id} ${user.email}`.toLowerCase().includes(search.value.toLowerCase())
+    `${user.email}`.toLowerCase().includes(search.value.toLowerCase())
   )
 )
 
-onMounted(async () => {
-  await loadUsers()
-})
-
 async function loadUsers() {
   try {
-    const { data } = await api.get('/user/admin/all')
-    users.value = data
+    const { data } = await api.get('/user/admin/all', {
+      params: {
+        page: currentPage.value,
+        size: pageSize.value
+      }
+    })
+    users.value = data.content
+    totalPages.value = data.totalPages
   } catch (e) {
     console.error('Failed to fetch users:', e)
+  }
+}
+
+function goToPage(page: number) {
+  if (page >= 0 && page < totalPages.value) {
+    currentPage.value = page
+    loadUsers()
   }
 }
 
@@ -93,6 +111,10 @@ async function updateAccess(userId: string, grant: boolean) {
     alert('Failed to update access.')
   }
 }
+
+onMounted(async () => {
+  await loadUsers()
+})
 </script>
 
 <style scoped lang="scss">
@@ -247,6 +269,34 @@ async function updateAccess(userId: string, grant: boolean) {
   .subscribed {
     color: #22c55e;
     font-weight: 500;
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+
+  button {
+    padding: 6px 12px;
+    font-size: 14px;
+    background: #1f2937;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    font-size: 14px;
+    color: #1f2937;
   }
 }
 </style>

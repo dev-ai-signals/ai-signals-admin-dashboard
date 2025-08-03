@@ -26,37 +26,77 @@
         <div class="cell amount">Paid Amount</div>
       </div>
 
-      <div class="table-row" v-for="entry in filteredData" :key="entry.id">
+      <div class="table-row" v-for="entry in filteredData" :key="entry.email + entry.date">
         <div class="cell email">{{ entry.email }}</div>
         <div class="cell date">{{ entry.date }}</div>
         <div class="cell amount">{{ entry.amount }}</div>
       </div>
     </div>
+
+    <div class="pagination">
+      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 0">Prev</button>
+      <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+      <button @click="goToPage(currentPage + 1)" :disabled="currentPage + 1 >= totalPages">Next</button>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import api from '@/shared/api/axios'
 
 const search = ref('')
 const activeTab = ref<'daily' | 'weekly' | 'monthly'>('daily')
+const payouts = ref<any[]>([])
+const currentPage = ref(0)
+const pageSize = ref(10)
+const totalPages = ref(0)
 
-const data = ref([
-  { id: 1, email: 'customer1@aisignals.com', date: '7/3/2025', amount: '1000$' },
-  { id: 2, email: 'customer2@aisignals.com', date: '7/4/2025', amount: '1000$' },
-  { id: 3, email: 'vg@mail.com', date: '7/5/2025', amount: '1000$' },
-  { id: 4, email: 'aisignals.aws@gmail.com', date: '7/1/2025', amount: '1000$' }
-])
+const periodMap = {
+  daily: 'DAILY',
+  weekly: 'WEEKLY',
+  monthly: 'MONTHLY'
+} as const
+
+const fetchPayouts = async () => {
+  try {
+    const { data } = await api.get('/payouts/history', {
+      params: {
+        period: periodMap[activeTab.value],
+        page: currentPage.value,
+        size: pageSize.value
+      }
+    })
+
+    payouts.value = data.content
+    totalPages.value = data.totalPages
+    currentPage.value = data.pageable.pageNumber
+  } catch (e) {
+    console.error('Failed to fetch payouts:', e)
+  }
+}
 
 const filteredData = computed(() =>
-  data.value
-    .filter(entry => entry.email.toLowerCase().includes(search.value.toLowerCase()))
-    .filter(entry => {
-      if (activeTab.value === 'daily') return true
-      if (activeTab.value === 'weekly') return entry.id !== 1
-      if (activeTab.value === 'monthly') return entry.id === 4
-    })
+  payouts.value.filter(entry =>
+    entry.email.toLowerCase().includes(search.value.toLowerCase())
+  )
 )
+
+function goToPage(page: number) {
+  if (page >= 0 && page < totalPages.value) {
+    currentPage.value = page
+    fetchPayouts()
+  }
+}
+
+watch(activeTab, () => {
+  currentPage.value = 0
+  fetchPayouts()
+})
+
+onMounted(() => {
+  fetchPayouts()
+})
 </script>
 
 <style scoped lang="scss">
@@ -154,4 +194,31 @@ const filteredData = computed(() =>
   }
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+
+  button {
+    padding: 6px 12px;
+    font-size: 14px;
+    background: #1f2937;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    font-size: 14px;
+    color: #1f2937;
+  }
+}
 </style>

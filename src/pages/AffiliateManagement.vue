@@ -71,6 +71,12 @@
         <div class="cell sold">{{ user.totalSold?.toFixed?.(2) ?? '0.00' }}</div>
       </div>
     </div>
+
+    <div class="pagination">
+      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 0">Prev</button>
+      <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+      <button @click="goToPage(currentPage + 1)" :disabled="currentPage + 1 >= totalPages">Next</button>
+    </div>
   </section>
 </template>
 
@@ -81,11 +87,24 @@ import api from '@/shared/api/axios'
 const search = ref('')
 const activeTier = ref<'T1' | 'T2'>('T1')
 const users = ref<any[]>([])
+const currentPage = ref(0)
+const pageSize = ref(10)
+const totalPages = ref(0)
 
-async function fetchUsers(tier: number) {
+async function fetchUsers(tier: number, page = 0) {
   try {
-    const { data } = await api.get(`/affiliate/admin/all?tier=${tier}`)
-    users.value = data.map((u: any) => ({
+    const { data } = await api.get('/affiliate/admin/all', {
+      params: {
+        tier,
+        page,
+        size: pageSize.value
+      }
+    })
+
+    totalPages.value = data.totalPages
+    currentPage.value = data.pageable.pageNumber
+
+    users.value = data.content.map((u: any) => ({
       ...u,
       commissionPercent: u.commissionPercent ?? 0,
       commissionPercentTier2: u.commissionPercentTier2 ?? 0,
@@ -94,6 +113,12 @@ async function fetchUsers(tier: number) {
     }))
   } catch (e) {
     console.error('Failed to fetch affiliates:', e)
+  }
+}
+
+function goToPage(page: number) {
+  if (page >= 0 && page < totalPages.value) {
+    fetchUsers(activeTier.value === 'T1' ? 1 : 2, page)
   }
 }
 
@@ -313,12 +338,40 @@ const filteredUsers = computed(() =>
         }
 
         &.apply-btn:disabled {
-          background-color: #d1d5db; // gray
+          background-color: #d1d5db;
           cursor: not-allowed;
-          color: #9ca3af; // lighter text
+          color: #9ca3af;
         }
       }
     }
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+
+  button {
+    padding: 6px 12px;
+    font-size: 14px;
+    background: #1f2937;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    font-size: 14px;
+    color: #1f2937;
   }
 }
 </style>
