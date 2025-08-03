@@ -24,12 +24,14 @@
         <div class="cell email">Affiliates: emails</div>
         <div class="cell date">Date</div>
         <div class="cell amount">Paid Amount</div>
+        <div class="cell status">Payment Status</div>
       </div>
 
       <div class="table-row" v-for="entry in filteredData" :key="entry.email + entry.date">
         <div class="cell email">{{ entry.email }}</div>
         <div class="cell date">{{ entry.date }}</div>
         <div class="cell amount">{{ entry.amount }}</div>
+        <div class="cell status">{{ entry.status }}</div>
       </div>
     </div>
 
@@ -82,9 +84,11 @@ const filteredData = computed(() =>
     .map(entry => {
       const rawAmount = entry.amount.replace(/USDC$/, '')
       const formattedAmount = (Number(rawAmount) / 1_000_000).toFixed(3) + ' USDC'
+
       return {
         ...entry,
-        amount: formattedAmount
+        amount: formattedAmount,
+        status: entry.payoutStatus || 'UNKNOWN'
       }
     })
 )
@@ -196,6 +200,28 @@ onMounted(() => {
       &.amount {
         flex: 1.2;
         justify-content: center;
+      }
+    }
+
+    .table-row .cell.status {
+      justify-content: center;
+      text-transform: uppercase;
+      font-weight: 600;
+
+      &.pending {
+        color: #fbbf24;
+      }
+
+      &.processing {
+        color: #3b82f6;
+      }
+
+      &.sent {
+        color: #22c55e;
+      }
+
+      &.failed {
+        color: #ef4444;
       }
     }
   }
