@@ -46,10 +46,10 @@
         </div>
         <div class="cell master">
           <button
-            :class="['btn', user.superAffiliate ? 'deactivate' : 'master-on']"
-            @click="toggleSuperAffiliate(user)"
+            :class="['btn', user.masterAffiliate ? 'deactivate' : 'master-on']"
+            @click="toggleMasterAffiliate(user)"
           >
-            {{ user.superAffiliate ? 'DEACTIVATE' : 'MASTER ON' }}
+            {{ user.masterAffiliate ? 'DEACTIVATE' : 'MASTER ON' }}
           </button>
         </div>
         <div class="cell commission">
@@ -67,8 +67,8 @@
             APPLY
           </button>
         </div>
-        <div v-if="activeTier === 'T2'" class="cell referred">{{ user.totalReferred }}</div>
-        <div class="cell sold">{{ user.totalSold?.toFixed?.(2) ?? '0.00' }}</div>
+        <div v-if="activeTier === 'T2'" class="cell referred">{{ user.totalInvitedAffiliates ?? 0 }}</div>
+        <div class="cell sold">{{ user.totalReferredCustomers ?? 0 }}</div>
       </div>
     </div>
 
@@ -135,15 +135,15 @@ watch(activeTier, (newTier) => {
   fetchUsers(newTier === 'T1' ? 1 : 2)
 })
 
-async function toggleSuperAffiliate(user: any) {
+async function toggleMasterAffiliate(user: any) {
   try {
     await api.post('/affiliate/admin/update', {
       userId: user.userId,
-      superAffiliate: !user.superAffiliate
+      masterAffiliate: !user.masterAffiliate
     })
     await fetchUsers(activeTier.value === 'T1' ? 1 : 2)
   } catch (e) {
-    console.error('Failed to toggle superAffiliate:', e)
+    console.error('Failed to toggle masterAffiliate:', e)
     alert('Failed to update user.')
   }
 }
