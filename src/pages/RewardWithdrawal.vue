@@ -77,9 +77,16 @@ const fetchPayouts = async () => {
 }
 
 const filteredData = computed(() =>
-  payouts.value.filter(entry =>
-    entry.email.toLowerCase().includes(search.value.toLowerCase())
-  )
+  payouts.value
+    .filter(entry => entry.email.toLowerCase().includes(search.value.toLowerCase()))
+    .map(entry => {
+      const rawAmount = entry.amount.replace(/USDC$/, '')
+      const formattedAmount = (Number(rawAmount) / 1_000_000).toFixed(3) + ' USDC'
+      return {
+        ...entry,
+        amount: formattedAmount
+      }
+    })
 )
 
 function goToPage(page: number) {
