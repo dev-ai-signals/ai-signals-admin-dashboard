@@ -31,7 +31,9 @@
         <div class="cell email">{{ entry.email }}</div>
         <div class="cell date">{{ entry.date }}</div>
         <div class="cell amount">{{ entry.amount }}</div>
-        <div class="cell status">{{ entry.status }}</div>
+        <div class="cell status">
+          <span :class="['status-pill', entry.status.toLowerCase()]">{{ entry.status }}</span>
+        </div>
       </div>
     </div>
 
@@ -197,31 +199,11 @@ onMounted(() => {
       }
 
       &.date,
-      &.amount {
+      &.amount,
+      &.status {
         flex: 1.2;
         justify-content: center;
-      }
-    }
-
-    .table-row .cell.status {
-      justify-content: center;
-      text-transform: uppercase;
-      font-weight: 600;
-
-      &.pending {
-        color: #fbbf24;
-      }
-
-      &.processing {
-        color: #3b82f6;
-      }
-
-      &.sent {
-        color: #22c55e;
-      }
-
-      &.failed {
-        color: #ef4444;
+        text-align: center;
       }
     }
   }
@@ -254,4 +236,38 @@ onMounted(() => {
     color: #1f2937;
   }
 }
+
+.status-pill {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.pending {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  &.processing {
+    background-color: #e0f2fe;
+    color: #075985;
+  }
+
+  &.sent {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  &.failed {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  &.unknown {
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+}
+
 </style>
