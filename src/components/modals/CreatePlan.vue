@@ -8,35 +8,36 @@
         </button>
       </div>
 
-      <form class="modal-body" @submit.prevent="savePlan">
-        <label>Name</label>
-        <input type="text" v-model="name" placeholder="Enter plan name" />
+      <div class="modal-scroll">
+        <form class="modal-body" @submit.prevent="savePlan">
+          <label>Name</label>
+          <input type="text" v-model="name" placeholder="Enter subscription name" />
 
-        <label>Price</label>
-        <input type="text" v-model="priceUSD" placeholder="Enter price" />
+          <label>Price</label>
+          <input type="text" v-model="priceUSD" placeholder="Enter price" />
 
-        <label>Free Trial Duration(days)</label>
-        <input type="number" v-model="freeTrialDuration" placeholder="Enter number of days" />
+          <label>Free Trial Duration(days)</label>
+          <input type="number" v-model="freeTrialDuration" placeholder="Enter number of days" />
 
-        <label>Duration (days)</label>
-        <input
-          type="number"
-          v-model="durationDays"
-          placeholder="Enter subscription duration"
-        />
+          <label>Duration (days)</label>
+          <input
+            type="number"
+            v-model="durationDays"
+            placeholder="Enter subscription duration"
+          />
 
-        <label>Tier 1 Commission</label>
-        <input type="text" v-model="tier1comission" placeholder="Enter amount" />
+          <label>Tier 1 Commission</label>
+          <input type="text" v-model="tier1comission" placeholder="Enter amount" />
 
-        <label>Tier 2 Commission</label>
-        <input type="text" v-model="tier2comission" placeholder="Enter amount" />
+          <label>Affiliate Plus Commission</label>
+          <input type="text" v-model="tier2comission" placeholder="Enter amount" />
 
-        <label>Master Commission</label>
-        <input type="text" v-model="masterCommission" placeholder="Enter amount" />
+          <label>Master Commission</label>
+          <input type="text" v-model="masterCommission" placeholder="Enter amount" />
 
-        <button type="submit" class="save-btn">Save</button>
-      </form>
-
+          <button type="submit" class="save-btn">Save</button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -81,8 +82,8 @@ async function savePlan() {
     tier2comission.value = ''
     masterCommission.value = ''
   } catch (e) {
-    console.error('Failed to create plan:', e)
-    alert('Failed to create plan')
+    console.error('Failed to create Subscription:', e)
+    alert('Failed to create Subscription')
   }
 }
 
@@ -108,6 +109,15 @@ async function savePlan() {
   border-radius: 12px;
   width: 344px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-scroll {
+  overflow-y: auto;
+  padding: 0 1px;
 }
 
 .modal-header {
@@ -138,7 +148,7 @@ async function savePlan() {
 .modal-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   padding: 16px;
 
   label {

@@ -21,7 +21,7 @@
 
     <div class="table">
       <div class="table-header">
-        <div class="cell email">Affiliates: emails</div>
+        <div class="cell email">Payouts</div>
         <div class="cell date">Date</div>
         <div class="cell amount">Paid Amount</div>
         <div class="cell status">Payment Status</div>

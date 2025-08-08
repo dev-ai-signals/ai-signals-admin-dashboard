@@ -19,7 +19,7 @@
             :class="{ active: activeTier === 'T2' }"
             @click="activeTier = 'T2'"
           >
-            TIER 2
+            PLUS
           </button>
         </div>
       </div>
@@ -29,9 +29,8 @@
       <div class="table-header">
         <div class="cell user">Email</div>
         <div class="cell status">Affiliate Status</div>
-        <div class="cell master">Set MASTER Affiliate Users</div>
-        <div class="cell commission">Commission%</div>
-        <div class="cell commission-tier2">Tier 2 Commission%</div>
+        <div class="cell commission">Tier 1 <br /> Commission%</div>
+        <div class="cell commission-tier2">Affiliate Plus Commission%</div>
         <div class="cell apply">Apply</div>
         <div v-if="activeTier === 'T2'" class="cell referred">Total Referred</div>
         <div class="cell sold">Total Sold</div>
@@ -43,14 +42,6 @@
           <span :class="user.active ? 'status-active' : 'status-inactive'">
             {{ user.active ? 'Active' : 'Inactive' }}
           </span>
-        </div>
-        <div class="cell master">
-          <button
-            :class="['btn', user.masterAffiliate ? 'deactivate' : 'master-on']"
-            @click="toggleMasterAffiliate(user)"
-          >
-            {{ user.masterAffiliate ? 'DEACTIVATE' : 'MASTER ON' }}
-          </button>
         </div>
         <div class="cell commission">
           <input type="number" v-model.number="user.commissionPercent" class="input" />
@@ -134,19 +125,6 @@ onMounted(() => fetchUsers(1))
 watch(activeTier, (newTier) => {
   fetchUsers(newTier === 'T1' ? 1 : 2)
 })
-
-async function toggleMasterAffiliate(user: any) {
-  try {
-    await api.post('/affiliate/admin/update', {
-      userId: user.userId,
-      masterAffiliate: !user.masterAffiliate
-    })
-    await fetchUsers(activeTier.value === 'T1' ? 1 : 2)
-  } catch (e) {
-    console.error('Failed to toggle masterAffiliate:', e)
-    alert('Failed to update user.')
-  }
-}
 
 async function updateCommission(user: any) {
   try {
@@ -278,10 +256,6 @@ const filteredUsers = computed(() =>
         }
       }
 
-      &.master {
-        flex: 1.2;
-      }
-
       &.commission {
         flex: 1;
       }
@@ -324,14 +298,6 @@ const filteredUsers = computed(() =>
         min-width: 90px;
         text-align: center;
         color: #fff;
-
-        &.master-on {
-          background-color: #22c55e;
-        }
-
-        &.deactivate {
-          background-color: #ef4444;
-        }
 
         &.apply-btn {
           background-color: #22c55e;

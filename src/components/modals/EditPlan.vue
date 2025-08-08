@@ -48,8 +48,8 @@ async function savePrice() {
     emit('saved', { id: props.plan.id, priceUSD: parseFloat(priceUSD.value) })
     emit('close')
   } catch (e) {
-    console.error('Failed to update plan price:', e)
-    alert('Failed to update plan price.')
+    console.error('Failed to update Subscription price:', e)
+    alert('Failed to update Subscription price.')
   }
 }
 </script>

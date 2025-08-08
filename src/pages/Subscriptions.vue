@@ -17,15 +17,23 @@
 
     <div class="table">
       <div class="table-header">
-        <div class="cell plan">Plan</div>
-        <div class="cell price">Current Price</div>
-        <div class="cell edit">Edit / Delete Plan's Price</div>
-        <div class="cell links">Master Affiliate Link</div>
+        <div class="cell plan">Name</div>
+        <div class="cell days">Duration <br /> Days</div>
+        <div class="cell trials">Trial <br /> Days</div>
+        <div class="cell tier1">Commission <br /> Tier1%</div>
+        <div class="cell plus">Commission <br /> Plus%</div>
+        <div class="cell price">Current <br /> Price</div>
+        <div class="cell edit">Edit / Delete <br /> Price</div>
+        <div class="cell links">Master <br /> Affiliate Link</div>
         <div class="cell user">Total Subscribed</div>
       </div>
 
       <div class="table-row" v-for="plan in plans" :key="plan.id">
         <div class="cell plan">{{ plan.name }}</div>
+        <div class="cell days">{{ plan.durationDays }}</div>
+        <div class="cell trials">{{ plan.trialDays }}</div>
+        <div class="cell tier1">{{ plan.tier1CommissionPercent }}%</div>
+        <div class="cell plus">{{ plan.tier2CommissionPercent }}%</div>
         <div class="cell price">${{ plan.priceUSD }}</div>
         <div class="cell edit">
           <img src="@/assets/icons/subscription/edit.svg" alt="Edit" class="icon"
@@ -96,7 +104,7 @@ async function fetchPlans() {
       users: plan.subscribedCount || 0
     }))
   } catch (e) {
-    console.error('Failed to load plans:', e)
+    console.error('Failed to load Subscriptions:', e)
   }
 }
 
@@ -109,15 +117,15 @@ function copyToClipboard(text: string) {
 onMounted(fetchPlans)
 
 async function deletePlan(planId: string) {
-  const confirmed = confirm('Are you sure you want to delete this plan?')
+  const confirmed = confirm('Are you sure you want to delete this Subscription?')
   if (!confirmed) return
 
   try {
     await api.delete(`/plans/${planId}`)
     plans.value = plans.value.filter(plan => plan.id !== planId)
   } catch (e) {
-    console.error('Failed to delete plan:', e)
-    alert('Failed to delete plan.')
+    console.error('Failed to delete Subscription:', e)
+    alert('Failed to delete Subscription.')
   }
 }
 </script>
@@ -229,30 +237,33 @@ async function deletePlan(planId: string) {
   }
 
   .cell {
-    flex: 1;
     display: flex;
     align-items: center;
+    padding-right: 12px;
 
     &.plan {
-      flex: 1;
+      flex-basis: 160px;
     }
 
-    &.price {
-      flex: 1;
+    &.days,
+    &.trials,
+    &.tier1,
+    &.plus,
+    &.price,
+    &.user {
+      flex-basis: 100px;
+      justify-content: flex-start;
     }
 
     &.edit {
-      flex: 1;
-      gap: 10px;
+      flex-basis: 120px;
+      gap: 12px;
     }
 
     &.links {
       flex: 1;
-    }
-
-    &.user {
-      flex: 1;
-      justify-content: flex-end;
+      min-width: 180px;
+      max-width: 250px;
     }
   }
 

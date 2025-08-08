@@ -35,11 +35,11 @@
           </div>
           <div class="dashboard__card">
             <div class="image-container">
-              <img :src="tier2Icon" alt="Tier 2 Affiliates" class="dashboard__icon" />
+              <img :src="tier2Icon" alt="Affiliates Plus" class="dashboard__icon" />
             </div>
             <div class="values-container">
               <div class="dashboard__value">{{ tier2Affiliates }}</div>
-              <div class="dashboard__label">Tier 2 Affiliates</div>
+              <div class="dashboard__label">Affiliates Plus</div>
             </div>
           </div>
           <div class="dashboard__card">
@@ -69,7 +69,7 @@
         </div>
         <div class="dashboard__table">
           <div class="dashboard__table-header">
-            <span><strong>Plan Name</strong></span>
+            <span><strong>Subscription Name</strong></span>
             <span class="green"><strong>Users Subscribed</strong></span>
           </div>
           <div class="dashboard__table-row" v-for="plan in plans" :key="plan.name">
@@ -120,7 +120,7 @@ onMounted(async () => {
       users: plan.subscribedCount || 0
     }))
   } catch (e) {
-    console.error('Failed to load dashboard summary or plans:', e)
+    console.error('Failed to load dashboard summary or Subscriptions:', e)
   }
 })
 </script>
@@ -135,6 +135,7 @@ onMounted(async () => {
     display: flex;
     align-items: flex-start;
     gap: 16px;
+    flex-wrap: wrap;
   }
 
   &__totals {
